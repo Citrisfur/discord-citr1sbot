@@ -21,7 +21,7 @@ async def note(ctx):
 		name = await bot.wait_for('message')
 		if name.author == ctx.author:
 			nameCheck = False
-	filename = "/home/brandin/Desktop/Discord Citr1sbot/notes/" + str(name.author).lower() + name.content.lower() + ".txt"
+	filename = "./notes/" + str(name.author).lower() + name.content.lower() + ".txt"
 	if os.path.exists(filename):
 		f = open(filename, 'r')
 		await ctx.send(f.read())
@@ -39,7 +39,7 @@ async def noteadd(ctx):
 		name = await bot.wait_for('message')
 		if name.author == ctx.author:
 			nameCheck = False
-	filename = "/home/brandin/Desktop/Discord Citr1sbot/notes/" + str(name.author).lower() + name.content.lower() + ".txt"
+	filename = "./notes/" + str(name.author).lower() + name.content.lower() + ".txt"
 	if os.path.exists(filename):
 		await ctx.send("Appending to note " + name.content + " created by " + str(name.author) + ". Contents?")
 		while noteCheck == True:
@@ -70,7 +70,7 @@ async def noteremove(ctx):
 		name = await bot.wait_for('message')
 		if name.author == ctx.author:
 			nameCheck = False
-	filename = "/home/brandin/Desktop/Discord Citr1sbot/notes/" + str(name.author).lower() + name.content.lower() + ".txt"
+	filename = "./notes/" + str(name.author).lower() + name.content.lower() + ".txt"
 	if os.path.exists(filename):
 		os.remove(filename)
 		await ctx.send("Note removed.")
@@ -81,7 +81,7 @@ async def noteremove(ctx):
 async def notelist(ctx):
 	list = "Notes that " + str(ctx.author) + " owns:\n"
 	
-	for file in os.listdir("/home/brandin/Desktop/Discord Citr1sbot/notes/"):
+	for file in os.listdir("./notes/"):
 		if str(ctx.author).lower() in file:
 			list += file.replace(str(ctx.author).lower(), '') + "\n"
 	if list == '':
