@@ -173,6 +173,74 @@ async def lyrics(ctx, *song):
 # async def timezone(ctx):
 #     await ctx.send(datetime.datetime.now(tz=utc))
 
+@bot.command(name='roll')
+async def roll(ctx, formula):
+    print("roll command was run by " + str(ctx.author) + " at " + str(datetime.datetime.now()))
+    diceCount = ''
+    diceSides = ''
+    diceroll = 0
+    modifier = ''
+    total = 0
+
+    #gets number of dice
+    for char in formula:
+        if char == 'd':
+            break
+        else:
+            diceCount += char
+
+
+    #gets number of sides
+    for char in formula[formula.index('d')+1:]:
+        if char == '+' or char == "-":
+            break
+        else:
+            diceSides += char
+
+    # rolling dice
+    diceCount = int(diceCount)
+    if diceCount == 1:
+        diceroll = randint(1, int(diceSides))
+        total = diceroll
+        output = f"rolling **1** die with **{diceSides}** sides results in the number **{diceroll}**, "
+    else:
+        output = f"rolling **{str(diceCount)}** dice with **{diceSides}** sides results in the numbers "
+        while diceCount != 0:
+            diceroll = randint(1, int(diceSides))
+            total += diceroll
+            if diceCount == 2 and total == diceroll:
+                output += f"**{str(diceroll)}** "
+            elif diceCount == 1:
+                output += f"and **{str(diceroll)}**, "
+            else:
+                output += f"**{str(diceroll)}**, "
+            diceCount -= 1
+
+    # modifiers
+    if ('+' in formula) or ('-' in formula):
+        if formula.find('+') != -1:
+            for char in formula[formula.index('+')+1:]:
+                modifier += char
+            total += int(modifier)
+            output += f"and a modifier of **+ {modifier}** yields a total of **{str(total)}**."
+        else:
+            for char in formula[formula.index('-')+1:]:
+                modifier += char
+            total -= int(modifier)
+            output += f"and a modifier of **- {modifier}** yields a total of **{str(total)}**."
+    elif diceCount == 1:
+        output = output.replace (", ", ".")
+    else:
+        output += f"which results in a total of **{str(total)}**."
+
+    if total < 1:
+        output += "\n_note: DnD diceroll totals cannot be less than 1, so your adjusted total is_ **1**."
+
+    if (diceSides == '1') and (diceCount == 1) and (modifier == ''):
+        await ctx.send("Rolling one die with one side results in a total of one, but you already knew that, didn't you?")
+    else:
+        await ctx.send(output)
+
 @bot.command(name='note')
 async def note(ctx, noteName, userName=''):
     print("note command was run by " + str(ctx.author) + " at " + str(datetime.datetime.now()))
@@ -304,6 +372,7 @@ async def typenote(ctx):
 async def on_command_error(ctx, error):
     usages = {
         "lyrics": "Usage: c!lyrics {song-name by artist-name}",
+        "roll": "Usage: c!roll {number-of-dice}d{number-of-dice-sides}(+(modifier))",
         "note": "Usage: c!note {note-name} (user-name)",
         "addnote": "Usage: c!addnote {note-name} (type)",
         "removenote": "Usage: c!removenote {note-name}",
@@ -316,6 +385,11 @@ async def on_command_error(ctx, error):
         await ctx.send(usages.get(ctx.invoked_with))
     elif (str(error) == "Converting to \"int\" failed for parameter \"count\".") or (str(error) == "Converting to \"int\" failed for parameter \"time\"."):
         await invoke(halfjoke)
+    elif ctx.invoked_with == "roll":
+        if "substring not found" in str(error):
+            await ctx.send("Please use the \"c!help roll\" command for proper usage formatting.")
+        elif "invalid literal" in str(error):
+            await ctx.send("Dice count and side count can only be integers.")
     else:
         await ctx.send(str(error))
 
