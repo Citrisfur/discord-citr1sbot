@@ -1,9 +1,11 @@
 # bot.py
-import os, re, requests, datetime
+import os, re, requests
+from datetime import datetime, timezone
 from random import randint
 from discord.ext import commands
 from dotenv import load_dotenv
 from time import sleep
+from math import floor
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -14,17 +16,16 @@ bot.remove_command('help')
 
 @bot.event
 async def on_ready():
-    for guild in bot.guilds:
-        if guild.name == GUILD:
-            break
+    global guild
+    guild = bot.guilds[0]
 
     global filepath
     filepath = "C:\\Users\\Your New Gaming PC\\Documents\\Discord Bots\\Discord Citr1sbot\\notes"
-    print(f"Citr1sbot was properly initalized at {str(datetime.datetime.now())}")
+    print(f"Citr1sbot was properly initalized at {str(datetime.now())}")
 
 @bot.command(name='help')
 async def help(ctx, command=''):
-    print(f"help command was run by {str(ctx.author)} at {str(datetime.datetime.now())}")
+    print(f"help command was run by {str(ctx.author)} at {str(datetime.now())}")
     header = '''
 All commands for Citr1sbot begin with the prefix 'c!'. Most commands are also formatted into user-friendly strings, instead of returning primital values.
 In the usage statements, parameters specified with {curly braces} required, while (parenthesis) are optional.
@@ -53,7 +54,7 @@ halfjoke // Returns a halfjoke, cortesy of JSchlatt.
         "lyrics": '''
 lyrics // Returns a song's lyrics.
     Usage: c!lyrics {song-name by artist-name}
-    [string] song-name by artist-name - the song name followed by the word 'by', and then the artist's name. the word 'by' must be included in the command, it is a delimiter between the song name and artist'''
+    [string] song-name by artist-name - the song name followed by the word 'by', and then the artist's name. the word 'by' must be included in the command, it is a delimiter between the song name and artist''',
         "roll": '''
 roll // Rolls a die and displays the result.
     Usage: c!roll {number-of-dice}d{number-of-dice-sides}(+/-)(modifier))
@@ -120,12 +121,18 @@ typenote
 
 @bot.command(name='ping')
 async def ping(ctx):
-    print(f"ping command was run by {str(ctx.author)} at {str(datetime.datetime.now())}")
+    print(f"ping command was run by {str(ctx.author)} at {str(datetime.now())}")
     await ctx.send(f"Citr1sbot is latent by {str(bot.latency)} seconds.")
+
+@bot.command(name='nnn')
+async def nnn(ctx):
+    print(f"nnn command was run by {str(ctx.author)} at {str(datetime.now())}")
+    timeDiff = datetime(2020, 12, 1, tzinfo=timezone.utc) - datetime.now(timezone.utc)
+    await ctx.send(f"NNN is over in {timeDiff.days} days, {floor(timeDiff.seconds/3600) % 24} hours, {floor(timeDiff.seconds/60) % 60} minutes and {timeDiff.seconds % 60} seconds, following UTC")
 
 @bot.command(name='halfjoke')
 async def halfjoke(ctx, count=1, time=0):
-    print(f"halfjoke command was run by {str(ctx.author)} at {str(datetime.datetime.now())}")
+    print(f"halfjoke command was run by {str(ctx.author)} at {str(datetime.now())}")
     await ctx.message.delete()
     halfjokes = ["I've spent the last four years looking for my ex-girlfriend's killer.", "I recently decided to sell my vaccuum cleaner.", "My girlfriend told me to go out and get her something that makes her look sexy.", "Where there's a will...", "I've just written a song about tortillas.", "My wife just found out I replaced our bed with a trampoline.", "Hedgehogs, eh?", "You can never lose a homeless person.", "I asked God for a bike.", "The first time I got a universal remote control, I thought to myself.", "Say what you want.", "Of course I should clean my windows.", "The potato should go in the front.", "There's no domestic violence going on.", "Wow, that's gotta be the fastest we've ever gotten to the accident site.", "This is my stepladder.", "I dreamed I was forced to eat a giant marshmallow.", "Prison.", "I'm very sorry sir, but it looks like your wife was hit by a bus."]
     count = int(count)
@@ -136,9 +143,10 @@ async def halfjoke(ctx, count=1, time=0):
         count -= 1
         sleep(time)
 
+#replace with beautiful soup someday
 @bot.command(name='lyrics')
 async def lyrics(ctx, *song):
-    print(f"lyrics command was run by {str(ctx.author)} at {str(datetime.datetime.now())}")
+    print(f"lyrics command was run by {str(ctx.author)} at {str(datetime.now())}")
     if "by" in song:
         song = " ".join(song)
         songName = song.split('by')[0].lower().replace(' ', '')
@@ -171,11 +179,11 @@ async def lyrics(ctx, *song):
 
 # @bot.command(name="timezone")
 # async def timezone(ctx):
-#     await ctx.send(datetime.datetime.now(tz=utc))
+#     await ctx.send(datetime.now(tz=utc))
 
 @bot.command(name='roll')
 async def roll(ctx, formula):
-    print(f"roll command was run by {str(ctx.author)} at {str(datetime.datetime.now())}")
+    print(f"roll command was run by {str(ctx.author)} at {str(datetime.now())}")
     diceCount = ''
     diceSides = ''
     diceroll = 0
@@ -240,9 +248,93 @@ async def roll(ctx, formula):
     else:
         await ctx.send(output)
 
+@bot.command(name='member')
+async def member(ctx):
+    print(f"member command was run by {str(ctx.author)} at {str(datetime.now())}")
+    await ctx.author.add_roles(guild.get_role(770697058616082443))
+    await ctx.message.delete()
+
+@bot.command(name='color')
+async def color(ctx):
+    print(f"color command was run by {str(ctx.author)} at {str(datetime.now())}")
+    menuCheck = True
+    colors = {
+        "1": "Red",
+        "2": "Orange",
+        "3": "Yellow",
+        "4": "Green",
+        "5": "Blue",
+        "6": "Purple"
+    }
+
+    menu = await ctx.send('''Please choose a color below, using the number!
+
+1. Red
+2. Orange
+3. Yellow
+4. Green
+5. Blue
+6. Purple''')
+
+    while menuCheck:
+        choice = await bot.wait_for('message')
+        if choice.author == ctx.author:
+            menuCheck = False
+
+    if colors.get(choice.content, None) is not None:
+        for role in guild.roles:
+            if role.name == colors[choice.content]:
+                if role in ctx.author.roles:
+                    await ctx.author.remove_roles(role)
+                    await ctx.send(f"You no longer have the color {colors[choice.content]}.")
+                else:
+                    await ctx.author.add_roles(role)
+                    await ctx.send(f"You now have the color {colors[choice.content]}!")
+                break
+    else:
+        await ctx.send("That option wasn't found, please try again.")
+
+    await menu.delete()
+
+@bot.command(name='pronoun')
+async def pronoun(ctx):
+    print(f"pronoun command was run by {str(ctx.author)} at {str(datetime.now())}")
+    menuCheck = True
+    pronouns = {
+        "1": "He/Him",
+        "2": "She/Her",
+        "3": "They/Them"
+    }
+
+    menu = await ctx.send('''Please choose a pronoun pair below, using the number!
+
+1. He/Him
+2. She/Her
+3. They/Them''')
+
+    while menuCheck:
+        choice = await bot.wait_for('message')
+        if choice.author == ctx.author:
+            menuCheck = False
+
+    if pronouns.get(choice.content, None) is not None:
+        for role in guild.roles:
+            if role.name == pronouns[choice.content]:
+                if role in ctx.author.roles:
+                    await ctx.author.remove_roles(role)
+                    await ctx.send(f"You no longer have the pronouns {pronouns[choice.content]}.")
+                else:
+                    await ctx.author.add_roles(role)
+                    await ctx.send(f"You now have the pronouns {pronouns[choice.content]}!")
+                break
+    else:
+        await ctx.send("That option wasn't found, please try again.")
+
+    await menu.delete()
+
 @bot.command(name='note')
 async def note(ctx, noteName, userName=''):
-    print(f"note command was run by {str(ctx.author)} at {str(datetime.datetime.now())}")
+    print(f"note command was run by {str(ctx.author)} at {str(datetime.now())}")
 
     # add support for server/editable notes
 
@@ -273,7 +365,7 @@ async def note(ctx, noteName, userName=''):
 
 @bot.command(name='addnote')
 async def addnote(ctx, noteName, noteType='private'):
-    print(f"addnote command was run by {str(ctx.author)} at {str(datetime.datetime.now())}")
+    print(f"addnote command was run by {str(ctx.author)} at {str(datetime.now())}")
     noteCheck = True
 
     if noteType == "editable" or noteType == "edit":
@@ -321,7 +413,7 @@ async def addnote(ctx, noteName, noteType='private'):
 
 @bot.command(name='editnote')
 async def editnote(ctx, noteName):
-    print(f"editnote command was run by {str(ctx.author)} at {str(datetime.datetime.now())}")
+    print(f"editnote command was run by {str(ctx.author)} at {str(datetime.now())}")
     if os.path.exists(filepath + f"\\users\\{ctx.author.id}\\{noteName.lower()}.txt"):
         f = open(filepath + f"\\users\\{ctx.author.id}\\{noteName.lower()}.txt", 'r')
         f.readline()
@@ -335,7 +427,7 @@ async def editnote(ctx, noteName):
 
 @bot.command(name='removenote')
 async def removenote(ctx):
-	print(f"removenote command was run by {str(ctx.author)} at {str(datetime.datetime.now())}")
+	print(f"removenote command was run by {str(ctx.author)} at {str(datetime.now())}")
     # nameCheck = True
 
 	# await ctx.send("Name of note?")
@@ -352,7 +444,7 @@ async def removenote(ctx):
 
 @bot.command(name='listnotes')
 async def listnotes(ctx, userName='', editable=''):
-	print(f"listnotes command was run by {str(ctx.author)} at {str(datetime.datetime.now())}")
+	print(f"listnotes command was run by {str(ctx.author)} at {str(datetime.now())}")
     # list = "Notes that " + str(ctx.author) + " owns:\n"
 
 	# for file in os.listdir("C:\\Users\\Your New Gaming PC\\Documents\\Discord Bots\\Discord Citr1sbot\\notes"):
@@ -365,7 +457,7 @@ async def listnotes(ctx, userName='', editable=''):
 
 @bot.command(name='typenote')
 async def typenote(ctx):
-    print(f"typenote command was run by {str(ctx.author)} at {str(datetime.datetime.now())}")
+    print(f"typenote command was run by {str(ctx.author)} at {str(datetime.now())}")
 
 @bot.event
 async def on_command_error(ctx, error):
